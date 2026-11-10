@@ -17,15 +17,15 @@ A new release is built automatically on the 5th of each month from the newest co
 
 <!-- stats:start -->
 - 2,112,712 headwords from the zhwiki dump of 2026-11-01, 3,952,585 simplified and traditional lookup entries
-- Yomitan package: dictionary format 3, 255 MB
+- Yomitan package: dictionary format 3, 295 MB
 <!-- stats:end -->
 - Pinyin readings and a simplified Chinese definition: the first one or two sentences of the article, up to about 150 characters, followed by a 维基百科 link to the full article
-- Simplified and traditional lookup forms, including Taiwan and Hong Kong character variants such as 台灣/臺灣 and 裡/裏
+- Simplified and traditional lookup forms, including Taiwan and Hong Kong character variants such as 台灣/臺灣 and 裡/裏; each entry starts with traditional and simplified badges, styled like the HYDCD and chengyu dictionaries
 - Redirects are included as headwords, so alternative names, former names and abbreviations find the article they point to (毛主席 shows 毛泽东)
 - Articles that share a name are listed as numbered senses: the main article first, then the others by how often Wikipedia links to them, each with its title qualifier in parentheses, e.g. `(越南)` under 东京
 - No frequency rankings
 
-Built from the zhwiki [MediaWiki Content Current](https://dumps.wikimedia.org/other/mediawiki_content_history/readme.html) dumps. Disambiguation pages, date and year articles, and titles longer than 16 characters (Yomitan's default scan length) are left out. Definitions are converted to simplified Chinese with OpenCC; readings come from pypinyin and may be wrong for some names. The term data is about 2 GB once unpacked, so importing takes a while.
+Built from the zhwiki [MediaWiki Content Current](https://dumps.wikimedia.org/other/mediawiki_content_history/readme.html) dumps. Disambiguation pages, date and year articles, and titles longer than 16 characters (Yomitan's default scan length) are left out. Definitions are converted to simplified Chinese with OpenCC; readings come from pypinyin and may be wrong for some names. The term data is about 3.4 GB once unpacked, so importing takes a while.
 
 ## Building
 
@@ -45,6 +45,7 @@ The [monthly workflow](.github/workflows/monthly-build.yml) runs these steps, at
 
 - `index.json` — stable Yomitan update index; use its raw GitHub URL above
 - `source_attribution.txt` — attribution and license notes included in the Yomitan package
+- `styles.css` — entry styles packaged into the ZIP (same stylesheet as hydcd-yomitan and chengyu-yomitan)
 - `build_dictionary.py` — download, extract and build steps
 - `wikitext.py` — turns an article's lead section into a plain-text definition
 - `.github/workflows/monthly-build.yml` — monthly build and release

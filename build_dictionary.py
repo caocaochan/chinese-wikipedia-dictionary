@@ -262,6 +262,24 @@ def article_url(title):
     return f"https://zh.wikipedia.org/zh-hans/{path}"
 
 
+def node(tag, content, kind=None, **extra):
+    """Structured-content element; `kind` becomes data-sc-content for styles.css."""
+    n = {"tag": tag, "content": content}
+    if kind:
+        n["data"] = {"content": kind}
+    n.update(extra)
+    return n
+
+
+def form_row(simplified, s2t):
+    """Traditional / simplified badges, the same header as the HYDCD and chengyu dictionaries."""
+    traditional = s2t.convert(simplified)
+    badges = [node("span", traditional, "traditional-term")]
+    if simplified != traditional:
+        badges.append(node("span", simplified, "simplified-term"))
+    return node("span", [node("span", badges, "terms-parent")], "first-row-parent")
+
+
 def headword_forms(simplified, originals, converters):
     forms = {simplified, *originals}
     for conv in converters:
@@ -362,12 +380,14 @@ def build(date, min_links):
 
     index = make_index(len(groups), date)
     converters = [opencc.OpenCC(c) for c in ("s2t", "s2tw", "s2hk")]
+    s2t = converters[0]
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     zip_path = DIST_DIR / ZIP_NAME
     n_entries = 0
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         z.writestr("index.json", json.dumps(index, ensure_ascii=False, indent=2))
         z.writestr("source_attribution.txt", ATTRIBUTION.format(date=date))
+        z.write(ROOT / "styles.css", "styles.css")  # shared with the HYDCD and chengyu dictionaries
         bank, bank_no = [], 0
 
         def flush():
@@ -379,19 +399,19 @@ def build(date, min_links):
         for seq, key in enumerate(sorted(groups), start=1):
             g = groups.pop(key)
             senses = sorted(g["senses"].items(), key=lambda kv: kv[1][0])[:MAX_SENSES]
+            sense_list = {
+                "tag": "ol",
+                "content": [
+                    {"tag": "li", "content": [
+                        text + " ",
+                        {"tag": "a", "href": article_url(article), "content": "维基百科"},
+                    ]}
+                    for article, (_, text) in senses
+                ],
+            }
             glossary = [{
                 "type": "structured-content",
-                "content": {
-                    "tag": "ol",
-                    "lang": "zh-Hans",
-                    "content": [
-                        {"tag": "li", "content": [
-                            text + " ",
-                            {"tag": "a", "href": article_url(article), "content": "维基百科"},
-                        ]}
-                        for article, (_, text) in senses
-                    ],
-                },
+                "content": node("span", [form_row(key, s2t), sense_list], "wikipedia-entry", lang="zh-Hans"),
             }]
             pinyin = reading(key)
             for form in headword_forms(key, g["forms"], converters):
