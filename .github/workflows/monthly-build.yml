@@ -1,0 +1,97 @@
+name: Monthly build
+
+on:
+  schedule:
+    - cron: "0 6 5 * *" # 06:00 UTC on the 5th of each month
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Dump date (YYYY-MM-DD) or 'latest'"
+        default: latest
+        required: true
+      force:
+        description: "Rebuild even if a release for this dump already exists"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Pick dump
+        id: dump
+        env:
+          DATE_INPUT: ${{ inputs.date || 'latest' }}
+          FORCE: ${{ inputs.force || false }}
+        run: |
+          if [ "$DATE_INPUT" = latest ]; then
+            date=$(python build_dictionary.py latest-date)
+          else
+            date="$DATE_INPUT"
+          fi
+          if ! [[ "$date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "::error::bad dump date: $date"; exit 1
+          fi
+          echo "date=$date" >> "$GITHUB_OUTPUT"
+          if gh release view "$date" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            if [ "$FORCE" != true ]; then
+              echo "Release $date already exists; nothing to build."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Build dictionary
+        if: steps.dump.outputs.skip != 'true'
+        run: python build_dictionary.py all --date "${{ steps.dump.outputs.date }}"
+
+      - name: Publish release
+        if: steps.dump.outputs.skip != 'true'
+        env:
+          DATE: ${{ steps.dump.outputs.date }}
+          EXISTS: ${{ steps.dump.outputs.exists }}
+        run: |
+          if [ "$EXISTS" = true ]; then
+            gh release upload "$DATE" dist/wikipedia_zh.zip --clobber
+            gh release edit "$DATE" --notes-file dist/release_notes.md --latest
+          else
+            gh release create "$DATE" dist/wikipedia_zh.zip \
+              --target "$GITHUB_SHA" \
+              --title "Chinese Wikipedia $DATE" \
+              --notes-file dist/release_notes.md \
+              --latest
+          fi
+
+      # Commit index.json only after the ZIP is live, so Yomitan never sees a
+      # new revision before it can download it.
+      - name: Update index.json
+        if: steps.dump.outputs.skip != 'true'
+        env:
+          DATE: ${{ steps.dump.outputs.date }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.json source_attribution.txt README.md
+          git commit -m "Update dictionary to zhwiki dump $DATE"
+          git pull --rebase origin main
+          git push origin HEAD:main

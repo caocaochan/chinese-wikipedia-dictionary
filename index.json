@@ -1,0 +1,15 @@
+{
+  "title": "Wikipedia",
+  "revision": "2026-11-10T10:57:10Z",
+  "format": 3,
+  "sequenced": true,
+  "sourceLanguage": "zh",
+  "targetLanguage": "zh",
+  "author": "Wikipedia contributors",
+  "isUpdatable": true,
+  "indexUrl": "https://raw.githubusercontent.com/caocaochan/chinese-wikipedia-dictionary/main/index.json",
+  "downloadUrl": "https://github.com/caocaochan/chinese-wikipedia-dictionary/releases/latest/download/wikipedia_zh.zip",
+  "url": "https://github.com/caocaochan/chinese-wikipedia-dictionary",
+  "description": "2,112,712 Chinese Wikipedia article titles with the first sentences of each article as a simplified Chinese gloss, from the zhwiki dump of 2026-11-01. Simplified and traditional lookup forms; no frequency data.",
+  "attribution": "Text from Chinese Wikipedia (https://zh.wikipedia.org/), by Wikipedia contributors, licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). Article leads were shortened and converted to simplified Chinese."
+}

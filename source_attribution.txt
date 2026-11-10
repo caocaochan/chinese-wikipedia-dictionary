@@ -1,0 +1,16 @@
+Source attribution
+
+Chinese Wikipedia (中文维基百科)
+https://zh.wikipedia.org/
+Text by Wikipedia contributors, licensed under the Creative Commons
+Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0):
+https://creativecommons.org/licenses/by-sa/4.0/
+
+Source: zhwiki MediaWiki Content Current dump of 2026-11-01
+https://dumps.wikimedia.org/other/mediawiki_content_current/zhwiki/
+
+Changes: each definition is the opening one or two sentences of the
+article's lead section, with markup removed, shortened to about 150
+characters, and converted to simplified Chinese. Redirect titles are
+listed as extra headwords for the article they point to. This dictionary
+is distributed under the same CC BY-SA 4.0 license.
