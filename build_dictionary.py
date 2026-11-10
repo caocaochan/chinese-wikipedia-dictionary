@@ -254,6 +254,14 @@ def reading(word):
     return "".join(lazy_pinyin(word, style=Style.TONE)).replace(" ", "")
 
 
+def article_url(title):
+    """Link to the article in simplified script. Non-ASCII stays unescaped (an IRI) to keep the file small."""
+    path = title.replace(" ", "_")
+    for ch, esc in (("%", "%25"), ("?", "%3F"), ("#", "%23"), ('"', "%22"), ("<", "%3C"), (">", "%3E")):
+        path = path.replace(ch, esc)
+    return f"https://zh.wikipedia.org/zh-hans/{path}"
+
+
 def headword_forms(simplified, originals, converters):
     forms = {simplified, *originals}
     for conv in converters:
@@ -370,13 +378,19 @@ def build(date, min_links):
 
         for seq, key in enumerate(sorted(groups), start=1):
             g = groups.pop(key)
-            senses = [text for _, text in sorted(g["senses"].values())[:MAX_SENSES]]
+            senses = sorted(g["senses"].items(), key=lambda kv: kv[1][0])[:MAX_SENSES]
             glossary = [{
                 "type": "structured-content",
                 "content": {
                     "tag": "ol",
                     "lang": "zh-Hans",
-                    "content": [{"tag": "li", "content": s} for s in senses],
+                    "content": [
+                        {"tag": "li", "content": [
+                            text + " ",
+                            {"tag": "a", "href": article_url(article), "content": "维基百科"},
+                        ]}
+                        for article, (_, text) in senses
+                    ],
                 },
             }]
             pinyin = reading(key)
@@ -461,8 +475,9 @@ https://dumps.wikimedia.org/other/mediawiki_content_current/zhwiki/
 Changes: each definition is the opening one or two sentences of the
 article's lead section, with markup removed, shortened to about 150
 characters, and converted to simplified Chinese. Redirect titles are
-listed as extra headwords for the article they point to. This dictionary
-is distributed under the same CC BY-SA 4.0 license.
+listed as extra headwords for the article they point to. Each definition
+links to its full article on Chinese Wikipedia. This dictionary is
+distributed under the same CC BY-SA 4.0 license.
 """
 
 

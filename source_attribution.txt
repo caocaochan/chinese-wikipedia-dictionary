@@ -12,5 +12,6 @@ https://dumps.wikimedia.org/other/mediawiki_content_current/zhwiki/
 Changes: each definition is the opening one or two sentences of the
 article's lead section, with markup removed, shortened to about 150
 characters, and converted to simplified Chinese. Redirect titles are
-listed as extra headwords for the article they point to. This dictionary
-is distributed under the same CC BY-SA 4.0 license.
+listed as extra headwords for the article they point to. Each definition
+links to its full article on Chinese Wikipedia. This dictionary is
+distributed under the same CC BY-SA 4.0 license.
